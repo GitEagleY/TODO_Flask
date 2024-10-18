@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <style>
+        .form-check-input {
+            width: 20px; /* Make checkboxes bigger */
+            height: 20px; /* Make checkboxes bigger */
+        }
+        .delete-btn {
+            font-size: 0.8rem; /* Make delete button smaller */
+        }
+    </style>
+</head>
+<body class="bg-dark-blue text-white">
+    <div class="container">
+        <h1 class="title has-text-centered">TODO App</h1>
+        <div class="field has-addons mb-4">
+            <div class="control is-expanded">
+                <input type="text" id="todo-input" class="input" placeholder="Add a new todo" />
+            </div>
+            <div class="control">
+                <button id="add-todo" class="button is-primary">Add</button>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-content">
+                <h2 class="title is-4">Tasks:</h2>
+                <ul id="todo-list">
+                    {% for todo in todos if not todo.completed %}
+                    <li class="mb-2">
+                        <input type="checkbox" class="form-check-input" data-id="{{ todo.id }}" />
+                        <span class="task-text">{{ todo.task }}</span>
+                        <button class="delete-btn button is-danger is-small" data-id="{{ todo.id }}">❌</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <h2 class="title is-4">Completed:</h2>
+                <ul id="completed-list">
+                    {% for todo in todos if todo.completed %}
+                    <li class="mb-2">
+                        <input type="checkbox" class="form-check-input" data-id="{{ todo.id }}" checked style="opacity: 0.5;" />
+                        <span class="task-text completed">{{ todo.task }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <button id="clear-completed" class="button is-danger mt-2">Clear Completed Tasks</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function updateTodoLists(todos) {
+                $("#todo-list").empty();
+                $("#completed-list").empty();
+
+                todos.forEach(todo => {
+                    if (!todo.completed) {
+                        $("#todo-list").append(`
+                            <li class="mb-2">
+                                <input type="checkbox" class="form-check-input" data-id="${todo.id}" />
+                                <span class="task-text">${todo.task}</span>
+                                <button class="delete-btn button is-danger is-small" data-id="${todo.id}">❌</button>
+                            </li>
+                        `);
+                    } else {
+                        $("#completed-list").append(`
+                            <li class="mb-2">
+                                <input type="checkbox" class="form-check-input" data-id="${todo.id}" checked style="opacity: 0.5;" />
+                                <span class="task-text completed">${todo.task}</span>
+                            </li>
+                        `);
+                    }
+                });
+            }
+
+            $("#add-todo").click(function () {
+                const todo = $("#todo-input").val().trim();
+                if (todo) {
+                    $.post("/add", { todo: todo }, function (data) {
+                        $("#todo-input").val(""); // Clear input
+                        updateTodoLists(data.todos);
+                    });
+                }
+            });
+
+            $(document).on("click", ".delete-btn", function () {
+                const todoId = $(this).data("id");
+                $.ajax({
+                    url: `/delete/${todoId}`,
+                    type: "DELETE",
+                    success: function (data) {
+                        updateTodoLists(data.todos);
+                    },
+                });
+            });
+
+            $(document).on("change", 'input[type="checkbox"]', function () {
+                const todoId = $(this).data("id");
+                $.ajax({
+                    url: `/update/${todoId}`,
+                    type: "PUT",
+                    success: function (data) {
+                        updateTodoLists(data.todos);
+                    },
+                });
+            });
+
+            $('#clear-completed').click(function () {
+                $.ajax({
+                    url: '/clear-completed',
+                    type: 'DELETE',
+                    success: function (data) {
+                        updateTodoLists(data.todos);
+                    },
+                });
+            });
+        });
+    </script>
+</body>
+</html>

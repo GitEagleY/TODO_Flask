@@ -1,0 +1,39 @@
+
+@import "https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css";
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    color: black; /* Default text color */
+}
+
+input {
+    margin-right: 10px; /* Space between input and button */
+}
+
+ul {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove padding */
+    margin-top: 20px; /* Space between input and task list */
+}
+
+/* Style for completed tasks */
+.completed {
+    color: darkgrey; /* Dark grey for completed tasks */
+    text-decoration: line-through; /* Strikethrough style */
+}
+
+/* Adjust button size */
+.delete-btn {
+    font-size: 0.8rem; /* Smaller font size */
+    padding: 0.2rem 0.4rem; /* Padding adjustments */
+}
+
+/* Increase task text size */
+.task-text {
+    font-size: 1.1rem; /* Bigger text for tasks */
+}
+
+/* Center text */
+.centered {
+    text-align: center; /* Center text */
+}
